@@ -6,12 +6,12 @@ This project is designed to showcase a professional, scalable, and modern AI app
 
 ## Key Features
 
-* **🤖 Flexible LLM Backend:** Dynamically configures itself to use either the Google Gemini API or any OpenAI-compatible API (like Ollama), based on the provided environment variables.
-* **🛠️ Multi-Tool Execution:** The agent can use multiple tools in a single turn to perform complex, multi-step tasks like calculating a user's caloric needs and then generating a meal plan based on the results.
-* **📦 Fully Containerized:** The entire backend stack (PostgreSQL Database, FastAPI Server, AI Agent) is orchestrated with Docker and Docker Compose for a seamless, one-command setup.
-* **⚙️ Automated Database Seeding:** On the first run, a dedicated Docker service automatically populates the PostgreSQL database with a comprehensive knowledge base of exercises and food nutrition data.
-* **🔗 Modern API:** A clean FastAPI backend serves the AI agent and provides a simple, powerful endpoint for interaction.
-* **🎨 Interactive Frontend:** A user-friendly HTML/CSS/JS frontend provides a polished chat interface for users to interact with the agent.
+* ** Flexible LLM Backend:** Dynamically configures itself to use either the Google Gemini API or any OpenAI-compatible API (like Ollama), based on the provided environment variables.
+* ** Multi-Tool Execution:** The agent can use multiple tools in a single turn to perform complex, multi-step tasks like calculating a user's caloric needs and then generating a meal plan based on the results.
+* ** Fully Containerized:** The entire backend stack (PostgreSQL Database, FastAPI Server, AI Agent) is orchestrated with Docker and Docker Compose for a seamless, one-command setup.
+* ** Automated Database Seeding:** On the first run, a dedicated Docker service automatically populates the PostgreSQL database with a comprehensive knowledge base of exercises and food nutrition data.
+* ** Modern API:** A clean FastAPI backend serves the AI agent and provides a simple, powerful endpoint for interaction.
+* ** Interactive Frontend:** A user-friendly HTML/CSS/JS frontend provides a polished chat interface for users to interact with the agent.
 
 ## Tech Stack
 
