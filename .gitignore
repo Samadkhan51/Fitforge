@@ -1,0 +1,26 @@
+# Environment variables
+# Never commit your secret keys!
+.env
+
+# Local Database Data
+# This folder is created by Docker to store your database and should not be version controlled.
+postgres-data/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE and editor specific files
+.vscode/
+.idea/
+*.swp
+
+# Temporary setup scripts
+setup.py
+
+
+# Operating System files
+.DS_Store
+Thumbs.db

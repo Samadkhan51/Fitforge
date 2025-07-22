@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitForge AI Coach</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="chat-root">
+        <header class="chat-header">
+            <button class="home-btn" onclick="window.location.href='index.html'" title="Back to Home">🏠</button>
+            <div class="chat-header-title" id="chat-header-title">🤖 FitForge AI Coach</div>
+        </header>
+        <div class="motivation-banner" id="motivation-banner"></div>
+        <main class="chat-main full-width">
+            <div id="chat-window" class="chat-window"></div>
+            <form id="chat-form" autocomplete="off" class="chat-form">
+                <div class="chat-input-row">
+                    <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off" required />
+                    <button type="submit">Send</button>
+                </div>
+            </form>
+        </main>
+        <canvas id="confetti-canvas"></canvas>
+    </div>
+    <script src="static/js/main.js"></script>
+</body>
+</html> 

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitForge - Choose Your Coach</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div class="landing-root">
+        <header class="landing-header">
+            <div class="landing-title">Welcome to <span class="brand">FitForge</span></div>
+            <div class="landing-subtitle">Choose your coaching focus to get started!</div>
+        </header>
+        <main class="landing-main">
+            <div class="card-grid">
+                <div class="mode-card" onclick="goToChat('both')">
+                    <div class="card-icon">🥗🏋️</div>
+                    <div class="card-title">Diet & Exercise</div>
+                    <div class="card-desc">Get a complete fitness and nutrition experience. Ask about workouts, meal plans, and more!</div>
+                </div>
+                <div class="mode-card" onclick="goToChat('diet')">
+                    <div class="card-icon">🥗</div>
+                    <div class="card-title">Diet Only</div>
+                    <div class="card-desc">Focus on nutrition, meal plans, calories, macros, and healthy eating. No exercise advice.</div>
+                </div>
+                <div class="mode-card" onclick="goToChat('exercise')">
+                    <div class="card-icon">🏋️</div>
+                    <div class="card-title">Exercise Only</div>
+                    <div class="card-desc">Get expert advice on workouts, routines, sets, reps, and exercise form. No diet advice.</div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        function goToChat(mode) {
+            window.location.href = `chat.html?mode=${mode}`;
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,23 @@
+fastmcp
+# google-generativeai # No longer needed
+litellm
+python-dotenv
+uvicorn
+psycopg2-binary
+SQLAlchemy
+google-adk
+fastapi
+pydantic
+
+
+
+# app/requirements.txt
+sqlalchemy
+psycopg2-binary
+fastmcp
+google-adk # <-- The missing library
+google-generativeai==0.7.1
+python-dotenv
+fastapi
+uvicorn[standard]
+pydantic
