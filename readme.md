@@ -2,11 +2,10 @@
 
 FitForge is a complete, full-stack web application that acts as a personal AI coach. It leverages a sophisticated, multi-tool AI agent to create highly personalized workout and meal plans based on user-specific data and goals.
 
-This project is designed to showcase a professional, scalable, and modern AI application architecture. It is highly flexible and can be configured to run with either the **Google Gemini API** or a local/remote **Ollama** instance.
 
 ## Key Features
 
-* ** Flexible LLM Backend:** Dynamically configures itself to use either the Google Gemini API or any OpenAI-compatible API (like Ollama), based on the provided environment variables.
+
 * ** Multi-Tool Execution:** The agent can use multiple tools in a single turn to perform complex, multi-step tasks like calculating a user's caloric needs and then generating a meal plan based on the results.
 * ** Fully Containerized:** The entire backend stack (PostgreSQL Database, FastAPI Server, AI Agent) is orchestrated with Docker and Docker Compose for a seamless, one-command setup.
 * ** Automated Database Seeding:** On the first run, a dedicated Docker service automatically populates the PostgreSQL database with a comprehensive knowledge base of exercises and food nutrition data.
