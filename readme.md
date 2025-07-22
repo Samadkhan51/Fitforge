@@ -30,7 +30,7 @@ This project is designed to showcase a professional, scalable, and modern AI app
 
 ### 1. Clone the Repository
 ```bash
-git clone [https://github.com/your-username/fitforge.git](https://github.com/your-username/fitforge.git)
+git clone https://github.com/SyedShahmeerAli12/FitForge-Agent
 cd fitforge
 ```
 
