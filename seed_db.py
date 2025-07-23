@@ -9,12 +9,23 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 # --- CORRECTED: Import ALL models ---
 from app.models import Base, Exercise, Food, User, UserProfile, WorkoutLog
 
-# This will use the correct URL provided by Render/Railway during deployment,
-# or fall back to the local Docker setup.
+# --- This logic makes the script work everywhere ---
+# 1. Try to get the URL from the deployment environment (like Railway/Render)
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+# 2. If it's not found, check if we are running INSIDE a Docker container
+#    (Docker Compose sets the IS_IN_CONTAINER variable for us)
+IS_IN_CONTAINER = os.getenv("IS_IN_CONTAINER")
+
 if not DATABASE_URL:
-    print("DATABASE_URL not found in environment, falling back to local Docker setup.")
-    DATABASE_URL = "postgresql://fitforge:fitforgepassword@postgres-db:5432/fitforgedb"
+    if IS_IN_CONTAINER:
+        # We are inside a Docker container (like the db-seeder service)
+        print("Running inside Docker. Connecting to 'postgres-db' service.")
+        DATABASE_URL = "postgresql://fitforge:fitforgepassword@postgres-db:5432/fitforgedb"
+    else:
+        # We are running on the local machine (e.g., python seed_db.py)
+        print("Running on local machine. Connecting to 'localhost'.")
+        DATABASE_URL = "postgresql://fitforge:fitforgepassword@localhost:5432/fitforgedb"
 
 
 def seed_database():
