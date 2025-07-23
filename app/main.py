@@ -1,8 +1,9 @@
-
+# app/main.py
 import logging
 import os
-logging.getLogger("google.adk").setLevel(logging.ERROR)
+from contextlib import asynccontextmanager # <-- Import this
 
+logging.getLogger("google.adk").setLevel(logging.ERROR)
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
@@ -10,15 +11,29 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional
 
-
 from .models import ActivityLevel, Goal
 from .agent import fitforge_agent
+from ..seed_db import seed_db # <-- Import the seeder script
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types as genai_types
 
+# --- NEW: Lifespan function to run seeder on startup ---
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # This code runs once when the application starts up.
+    print("Application startup: Checking and seeding database...")
+    try:
+        # We call the seed_database function directly.
+        seed_db.seed_database()
+        print("✅ Database seeding check complete.")
+    except Exception as e:
+        print(f"❌ Database seeding failed on startup: {e}")
+    yield
+    # Code below yield would run on shutdown.
 
-app = FastAPI(title="FitForge Agent API")
+app = FastAPI(title="FitForge Agent API", lifespan=lifespan) # <-- Add lifespan here
+
 app.mount("/static", StaticFiles(directory="app/frontend/static"), name="static")
 session_service = InMemorySessionService()
 runner = Runner(
@@ -26,7 +41,6 @@ runner = Runner(
     app_name="fitforge_agent_app",
     session_service=session_service,
 )
-
 
 class PlanRequest(BaseModel):
     age: int
@@ -37,7 +51,6 @@ class PlanRequest(BaseModel):
     goal: Goal
     available_equipment: List[str]
     days_per_week: int
-
 
 @app.post("/generate-plan")
 async def generate_plan(request: PlanRequest):
@@ -82,17 +95,14 @@ async def generate_plan(request: PlanRequest):
         print(f"An error occurred: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
     mode: Optional[str] = 'both'
 
-
 class ChatResponse(BaseModel):
     response: str
     session_id: str
-
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
@@ -104,13 +114,30 @@ async def chat(request: ChatRequest):
         else:
             session = await session_service.create_session(app_name="fitforge_agent_app", user_id="api_user")
 
+        # --- UPDATED: Stricter System Prompts ---
         if request.mode == 'diet':
-            system_prompt = "You are FitForge, an expert diet and nutrition AI coach..."
+            system_prompt = (
+                "You are FitForge, an expert diet and nutrition AI coach. "
+                "Your sole purpose is to answer questions about diet, nutrition, food, calories, macros, and healthy eating. "
+                "You MUST politely refuse to answer any question that is not related to these topics, including exercise. "
+                "If you do not know the user's dietary preferences (e.g., vegetarian, allergies) or calorie goals, you must ask for this information before providing a plan."
+            )
         elif request.mode == 'exercise':
-            system_prompt = "You are FitForge, an expert exercise and fitness AI coach..."
-        else:
-            system_prompt = "You are FitForge, an expert fitness and nutrition AI coach..."
-        full_prompt = f"{system_prompt}\n\nUser: {request.message}"
+            system_prompt = (
+                "You are FitForge, an expert exercise and fitness AI coach. "
+                "Your sole purpose is to answer questions about exercise, workouts, routines, sets, reps, and exercise form. "
+                "You MUST politely refuse to answer any question that is not related to these topics, including diet and nutrition. "
+                "If you do not know the user's experience level (beginner, intermediate, advanced) or how often they work out, you must ask for this information before providing a plan."
+            )
+        else: # 'both' mode
+            system_prompt = (
+                "You are FitForge, an expert fitness and nutrition AI coach. "
+                "Your purpose is to assist with fitness AND nutrition. "
+                "You MUST politely refuse to answer any question that is not related to fitness, diet, or health. "
+                "If you need details like age, weight, height, goal, etc., to provide a personalized plan, you must ask for them."
+            )
+        
+        full_prompt = f"{system_prompt}\n\nAlways be creative, engaging, and motivational! Use emojis and well-structured markdown.\n\nUser: {request.message}"
 
         user_message = genai_types.Content(role="user", parts=[genai_types.Part(text=full_prompt)])
         final_response = "[Agent did not produce a final response]"
@@ -122,7 +149,6 @@ async def chat(request: ChatRequest):
     except Exception as e:
         print(f"An error occurred: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.get("/")
 async def read_index():
