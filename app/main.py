@@ -1,7 +1,6 @@
 # app/main.py
 import logging
 import os
-from contextlib import asynccontextmanager # <-- Import this
 
 logging.getLogger("google.adk").setLevel(logging.ERROR)
 
@@ -13,26 +12,14 @@ from typing import List, Optional
 
 from .models import ActivityLevel, Goal
 from .agent import fitforge_agent
-from ..seed_db import seed_db # <-- Import the seeder script
+from . import seed_db # <-- Import the seeder script
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types as genai_types
 
-# --- NEW: Lifespan function to run seeder on startup ---
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # This code runs once when the application starts up.
-    print("Application startup: Checking and seeding database...")
-    try:
-        # We call the seed_database function directly.
-        seed_db.seed_database()
-        print("✅ Database seeding check complete.")
-    except Exception as e:
-        print(f"❌ Database seeding failed on startup: {e}")
-    yield
-    # Code below yield would run on shutdown.
 
-app = FastAPI(title="FitForge Agent API", lifespan=lifespan) # <-- Add lifespan here
+
+app = FastAPI(title="FitForge Agent API") # <-- Add lifespan here
 
 app.mount("/static", StaticFiles(directory="app/frontend/static"), name="static")
 session_service = InMemorySessionService()
