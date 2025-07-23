@@ -1,11 +1,13 @@
+version: "3.9" 
+
 services:
   postgres-db:
     image: postgres:15-alpine
     container_name: fitforge-postgres-db
     environment:
-      - POSTGRES_USER=fitforge
-      - POSTGRES_PASSWORD=fitforgepassword
-      - POSTGRES_DB=fitforgedb
+      POSTGRES_USER: fitforge
+      POSTGRES_PASSWORD: fitforgepassword
+      POSTGRES_DB: fitforgedb
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -16,7 +18,8 @@ services:
       start_period: 30s
 
   db-seeder:
-    build: .
+    build:
+      context: .
     depends_on:
       postgres-db:
         condition: service_healthy
@@ -24,22 +27,16 @@ services:
 
   agent-api:
     container_name: fitforge-agent-api
-    build: .
+    build:
+      context: .
     ports:
       - "8000:8000"
     depends_on:
       db-seeder:
         condition: service_completed_successfully
     environment:
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - OLLAMA_MODEL=${OLLAMA_MODEL}
-      - DATABASE_URL=postgresql://fitforge:fitforgepassword@postgres-db:5432/fitforgedb
-      - OLLAMA_API_BASE=${OLLAMA_API_BASE}
-      - LITELLM_DEBUG=${LITELLM_DEBUG}
-      - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      DATABASE_URL: postgresql://fitforge:fitforgepassword@postgres-db:5432/fitforgedb
 
 volumes:
   postgres-data:
-    driver: local
