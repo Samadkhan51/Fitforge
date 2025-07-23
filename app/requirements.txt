@@ -1,13 +1,3 @@
-fastmcp
-# google-generativeai # No longer needed
-litellm
-python-dotenv
-uvicorn
-psycopg2-binary
-SQLAlchemy
-google-adk
-fastapi
-pydantic
 
 
 
