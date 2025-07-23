@@ -1,8 +1,5 @@
-# app/main.py
 import logging
 import os
-
-logging.getLogger("google.adk").setLevel(logging.ERROR)
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
@@ -12,16 +9,21 @@ from typing import List, Optional
 
 from .models import ActivityLevel, Goal
 from .agent import fitforge_agent
-from . import seed_db # <-- Import the seeder script
+
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types as genai_types
 
+# Configure logging
+logging.getLogger("google.adk").setLevel(logging.ERROR)
 
+# Initialize FastAPI app
+app = FastAPI(title="FitForge Agent API")
 
-app = FastAPI(title="FitForge Agent API") # <-- Add lifespan here
-
+# Mount static files
 app.mount("/static", StaticFiles(directory="app/frontend/static"), name="static")
+
+# Initialize session service and runner
 session_service = InMemorySessionService()
 runner = Runner(
     agent=fitforge_agent,
@@ -29,6 +31,7 @@ runner = Runner(
     session_service=session_service,
 )
 
+# Request model for plan generation
 class PlanRequest(BaseModel):
     age: int
     weight_kg: float
@@ -56,19 +59,23 @@ async def generate_plan(request: PlanRequest):
     - **Height:** {request.height_cm} cm
 
     Your Task:
-    1.  First, calculate the user's daily energy and macronutrient needs.
-    2.  Based on those needs, create a detailed, sample one-day meal plan.
-    3.  Create a detailed, {request.days_per_week}-day workout plan tailored to their goal and equipment.
-    4.  Combine everything into a single, encouraging, and easy-to-read report.
+    1. First, calculate the user's daily energy and macronutrient needs.
+    2. Based on those needs, create a detailed, sample one-day meal plan.
+    3. Create a detailed, {request.days_per_week}-day workout plan tailored to their goal and equipment.
+    4. Combine everything into a single, encouraging, and easy-to-read report.
     """
+
     try:
         session = await session_service.create_session(
             app_name="fitforge_agent_app", user_id="api_user"
         )
+
         user_message = genai_types.Content(
             role="user", parts=[genai_types.Part(text=prompt)]
         )
+
         final_response = "[Agent did not produce a final response]"
+
         async for event in runner.run_async(
             user_id=session.user_id,
             session_id=session.id,
@@ -77,11 +84,15 @@ async def generate_plan(request: PlanRequest):
             if event.is_final_response() and event.content and event.content.parts:
                 final_response = event.content.parts[0].text
                 break
+
         return {"plan": final_response}
+
     except Exception as e:
         print(f"An error occurred: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# Chat endpoint
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
@@ -95,52 +106,53 @@ class ChatResponse(BaseModel):
 async def chat(request: ChatRequest):
     try:
         if request.session_id:
-            session = await session_service.get_session(app_name="fitforge_agent_app", user_id="api_user", session_id=request.session_id)
+            session = await session_service.get_session(
+                app_name="fitforge_agent_app", user_id="api_user", session_id=request.session_id
+            )
             if not session:
-                session = await session_service.create_session(app_name="fitforge_agent_app", user_id="api_user")
+                session = await session_service.create_session(
+                    app_name="fitforge_agent_app", user_id="api_user"
+                )
         else:
-            session = await session_service.create_session(app_name="fitforge_agent_app", user_id="api_user")
+            session = await session_service.create_session(
+                app_name="fitforge_agent_app", user_id="api_user"
+            )
 
-        # --- UPDATED: Stricter System Prompts ---
         if request.mode == 'diet':
-            system_prompt = (
-                "You are FitForge, an expert diet and nutrition AI coach. "
-                "Your sole purpose is to answer questions about diet, nutrition, food, calories, macros, and healthy eating. "
-                "You MUST politely refuse to answer any question that is not related to these topics, including exercise. "
-                "If you do not know the user's dietary preferences (e.g., vegetarian, allergies) or calorie goals, you must ask for this information before providing a plan."
-            )
+            system_prompt = "You are FitForge, an expert diet and nutrition AI coach..."
         elif request.mode == 'exercise':
-            system_prompt = (
-                "You are FitForge, an expert exercise and fitness AI coach. "
-                "Your sole purpose is to answer questions about exercise, workouts, routines, sets, reps, and exercise form. "
-                "You MUST politely refuse to answer any question that is not related to these topics, including diet and nutrition. "
-                "If you do not know the user's experience level (beginner, intermediate, advanced) or how often they work out, you must ask for this information before providing a plan."
-            )
-        else: # 'both' mode
-            system_prompt = (
-                "You are FitForge, an expert fitness and nutrition AI coach. "
-                "Your purpose is to assist with fitness AND nutrition. "
-                "You MUST politely refuse to answer any question that is not related to fitness, diet, or health. "
-                "If you need details like age, weight, height, goal, etc., to provide a personalized plan, you must ask for them."
-            )
-        
-        full_prompt = f"{system_prompt}\n\nAlways be creative, engaging, and motivational! Use emojis and well-structured markdown.\n\nUser: {request.message}"
+            system_prompt = "You are FitForge, an expert exercise and fitness AI coach..."
+        else:
+            system_prompt = "You are FitForge, an expert fitness and nutrition AI coach..."
 
-        user_message = genai_types.Content(role="user", parts=[genai_types.Part(text=full_prompt)])
+        full_prompt = f"{system_prompt}\n\nUser: {request.message}"
+
+        user_message = genai_types.Content(
+            role="user", parts=[genai_types.Part(text=full_prompt)]
+        )
+
         final_response = "[Agent did not produce a final response]"
-        async for event in runner.run_async(user_id=session.user_id, session_id=session.id, new_message=user_message):
+
+        async for event in runner.run_async(
+            user_id=session.user_id, session_id=session.id, new_message=user_message
+        ):
             if event.is_final_response() and event.content and event.content.parts:
                 final_response = event.content.parts[0].text
                 break
+
         return ChatResponse(response=final_response, session_id=session.id)
+
     except Exception as e:
         print(f"An error occurred: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# Serve index page
 @app.get("/")
 async def read_index():
     return FileResponse('app/frontend/index.html')
 
+# Serve other static HTML pages
 @app.get("/{page_name}.html")
 async def serve_html(page_name: str):
     file_path = f"app/frontend/{page_name}.html"
