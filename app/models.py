@@ -1,4 +1,4 @@
-# app/models.py
+ 
 from sqlalchemy import Column, Integer, String, Float, DateTime, Enum, ForeignKey
 from sqlalchemy.orm import relationship, DeclarativeBase
 from datetime import datetime
@@ -27,7 +27,7 @@ class Goal(str, enum.Enum):
 
 class UserProfile(Base):
     __tablename__ = 'user_profiles'
-    # ... (rest of the schema is the same)
+    
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'))
     age = Column(Integer)
@@ -66,7 +66,7 @@ class WorkoutLog(Base):
     weight_kg = Column(Float)
     date = Column(DateTime, default=datetime.utcnow)
 
-    # (Keep all the existing classes like User, Exercise, Food, etc.)
+    
 
 class WeightLog(Base):
     __tablename__ = 'weight_logs'

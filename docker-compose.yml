@@ -15,13 +15,12 @@ services:
       retries: 5
       start_period: 30s
 
-  # --- NEW SERVICE ---
   db-seeder:
-    build: . # It will use the same Docker image as your main app
+    build: .
     depends_on:
       postgres-db:
-        condition: service_healthy # It waits for the database to be ready
-    command: python seed_db.py # This is the command it runs
+        condition: service_healthy
+    command: python seed_db.py
 
   agent-api:
     container_name: fitforge-agent-api
@@ -29,8 +28,6 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      # --- MODIFIED DEPENDENCY ---
-      # Now, the agent waits for the seeder to finish its job
       db-seeder:
         condition: service_completed_successfully
     environment:

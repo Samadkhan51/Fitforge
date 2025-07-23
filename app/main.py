@@ -1,15 +1,15 @@
-# app/main.py
+
 import logging
 import os
-
-# Suppress noisy, non-critical warnings from the ADK library for cleaner logs.
 logging.getLogger("google.adk").setLevel(logging.ERROR)
+
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse  # <-- Import FileResponse
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional
+
 
 from .models import ActivityLevel, Goal
 from .agent import fitforge_agent
@@ -17,18 +17,16 @@ from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types as genai_types
 
+
 app = FastAPI(title="FitForge Agent API")
-
-# --- Mount the static files directory (CSS, JS) ---
 app.mount("/static", StaticFiles(directory="app/frontend/static"), name="static")
-
-# --- API and Agent Logic (Your code is perfect here) ---
 session_service = InMemorySessionService()
 runner = Runner(
     agent=fitforge_agent,
     app_name="fitforge_agent_app",
     session_service=session_service,
 )
+
 
 class PlanRequest(BaseModel):
     age: int
@@ -40,9 +38,9 @@ class PlanRequest(BaseModel):
     available_equipment: List[str]
     days_per_week: int
 
+
 @app.post("/generate-plan")
 async def generate_plan(request: PlanRequest):
-    # This endpoint logic is correct.
     prompt = f"""
     Please act as an expert fitness and nutrition coach.
     A new client has provided the following profile and needs a comprehensive fitness and meal plan.
@@ -84,20 +82,21 @@ async def generate_plan(request: PlanRequest):
         print(f"An error occurred: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
     mode: Optional[str] = 'both'
 
+
 class ChatResponse(BaseModel):
     response: str
     session_id: str
 
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    # This endpoint logic is correct.
     try:
-        # (The rest of your chat logic is correct)
         if request.session_id:
             session = await session_service.get_session(app_name="fitforge_agent_app", user_id="api_user", session_id=request.session_id)
             if not session:
@@ -105,13 +104,12 @@ async def chat(request: ChatRequest):
         else:
             session = await session_service.create_session(app_name="fitforge_agent_app", user_id="api_user")
 
-        # (The rest of your system prompt logic is correct)
         if request.mode == 'diet':
-            system_prompt = "You are FitForge, an expert diet and nutrition AI coach..." # Truncated for brevity
+            system_prompt = "You are FitForge, an expert diet and nutrition AI coach..."
         elif request.mode == 'exercise':
-            system_prompt = "You are FitForge, an expert exercise and fitness AI coach..." # Truncated for brevity
+            system_prompt = "You are FitForge, an expert exercise and fitness AI coach..."
         else:
-            system_prompt = "You are FitForge, an expert fitness and nutrition AI coach..." # Truncated for brevity
+            system_prompt = "You are FitForge, an expert fitness and nutrition AI coach..."
         full_prompt = f"{system_prompt}\n\nUser: {request.message}"
 
         user_message = genai_types.Content(role="user", parts=[genai_types.Part(text=full_prompt)])
@@ -125,15 +123,13 @@ async def chat(request: ChatRequest):
         print(f"An error occurred: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# --- ADD THESE ENDPOINTS TO SERVE YOUR HTML ---
+
 @app.get("/")
 async def read_index():
-    """Serves the main landing page."""
     return FileResponse('app/frontend/index.html')
 
 @app.get("/{page_name}.html")
 async def serve_html(page_name: str):
-    """Serves other HTML pages like chat.html."""
     file_path = f"app/frontend/{page_name}.html"
     if os.path.exists(file_path):
         return FileResponse(file_path)

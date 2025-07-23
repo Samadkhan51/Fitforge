@@ -19,6 +19,7 @@ __pycache__/
 
 # Temporary setup scripts
 setup.py
+test.py
 
 
 # Operating System files

@@ -1,4 +1,4 @@
-# app/agent.py
+ 
 import os
 from dotenv import load_dotenv
 from google.adk.agents.llm_agent import LlmAgent
@@ -7,7 +7,7 @@ from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioConnectionPar
 
 load_dotenv()
 
-# Set up the connection to the local tool server
+ 
 mcp_connection_params = StdioConnectionParams(
     server_params={
         "command": "python",
@@ -16,11 +16,11 @@ mcp_connection_params = StdioConnectionParams(
     timeout=60.0,
 )
 
-# Use LiteLlm to connect to the Ollama model specified in the .env file
+ 
 model_name = os.getenv("OLLAMA_MODEL", "ollama_chat/qwen2.5:32b")
 model = LiteLlm(model=model_name)
 
-# Define the master agent that will orchestrate the tasks
+ 
 fitforge_agent = LlmAgent(
     model=model,
     name="fitforge_agent",
