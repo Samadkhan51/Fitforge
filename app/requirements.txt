@@ -1,11 +1,8 @@
 
-
-
-# app/requirements.txt
 sqlalchemy
 psycopg2-binary
 fastmcp
-google-adk # <-- The missing library
+google-adk
 google-generativeai==0.7.1
 python-dotenv
 fastapi
