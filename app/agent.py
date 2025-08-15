@@ -21,22 +21,34 @@ mcp_connection_params = StdioConnectionParams(
     timeout=60.0,
 )
 
-# Debug: Print environment variables to see what's available
-print("DEBUG: Available environment variables:")
-for key in sorted(os.environ.keys()):
-    if 'GOOGLE' in key or 'API' in key or 'RAILWAY' in key:
-        print(f"  {key}: {'***' if 'KEY' in key else os.environ[key]}")
-
+# Try multiple ways to get the API key
 api_key = os.getenv("GOOGLE_API_KEY")
-print(f"DEBUG: GOOGLE_API_KEY found: {'Yes' if api_key else 'No'}")
-if api_key:
-    print(f"DEBUG: API key starts with: {api_key[:10]}...")
+
+# If not found, try alternative environment variable names that Railway might use
+if not api_key:
+    api_key = os.getenv("GOOGLE_API_KEY_")  # With trailing underscore
+if not api_key:
+    api_key = os.getenv("google_api_key")   # Lowercase
+if not api_key:
+    api_key = os.getenv("GoogleApiKey")     # CamelCase
+
+# Debug: Check what we found
+print(f"Environment variable check: GOOGLE_API_KEY = {'Found' if api_key else 'Not Found'}")
 
 if not api_key:
-    print("DEBUG: All environment variables:")
-    for key, value in sorted(os.environ.items()):
-        print(f"  {key}: {'***' if 'KEY' in key or 'PASSWORD' in key or 'SECRET' in key else value}")
-    raise ValueError("LLM configuration error: Please set GOOGLE_API_KEY environment variable.")
+    # Print available environment variables for debugging
+    print("Available environment variables:")
+    env_vars = list(os.environ.keys())
+    print(f"Total variables: {len(env_vars)}")
+    
+    # Look for any variable that might contain our API key
+    potential_keys = [k for k in env_vars if 'GOOGLE' in k.upper() or 'API' in k.upper()]
+    if potential_keys:
+        print(f"Potential API key variables: {potential_keys}")
+    else:
+        print("No variables containing 'GOOGLE' or 'API' found")
+    
+    raise ValueError(f"LLM configuration error: GOOGLE_API_KEY environment variable not found. Available vars: {len(env_vars)}")
 
 # --- Define the FitForge Agent ---
 fitforge_agent = LlmAgent(
