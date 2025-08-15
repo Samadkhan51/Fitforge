@@ -1,11 +1,16 @@
 # app/agent.py
 import os
-from dotenv import load_dotenv
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioConnectionParams
 from google.adk.models import Gemini
 
-load_dotenv()
+# Try to load .env file if it exists (for local development)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # dotenv not available, which is fine for production deployments
+    pass
 
 mcp_connection_params = StdioConnectionParams(
     server_params={
@@ -17,7 +22,7 @@ mcp_connection_params = StdioConnectionParams(
 
 api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
-    raise ValueError("LLM configuration error: Please set GOOGLE_API_KEY in your .env file.")
+    raise ValueError("LLM configuration error: Please set GOOGLE_API_KEY environment variable.")
 
 # --- Define the FitForge Agent ---
 fitforge_agent = LlmAgent(
