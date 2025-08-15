@@ -8,9 +8,10 @@ from google.adk.models import Gemini
 try:
     from dotenv import load_dotenv
     load_dotenv()
+    print("DEBUG: dotenv loaded successfully")
 except ImportError:
     # dotenv not available, which is fine for production deployments
-    pass
+    print("DEBUG: dotenv not available, using system environment variables")
 
 mcp_connection_params = StdioConnectionParams(
     server_params={
@@ -20,8 +21,21 @@ mcp_connection_params = StdioConnectionParams(
     timeout=60.0,
 )
 
+# Debug: Print environment variables to see what's available
+print("DEBUG: Available environment variables:")
+for key in sorted(os.environ.keys()):
+    if 'GOOGLE' in key or 'API' in key or 'RAILWAY' in key:
+        print(f"  {key}: {'***' if 'KEY' in key else os.environ[key]}")
+
 api_key = os.getenv("GOOGLE_API_KEY")
+print(f"DEBUG: GOOGLE_API_KEY found: {'Yes' if api_key else 'No'}")
+if api_key:
+    print(f"DEBUG: API key starts with: {api_key[:10]}...")
+
 if not api_key:
+    print("DEBUG: All environment variables:")
+    for key, value in sorted(os.environ.items()):
+        print(f"  {key}: {'***' if 'KEY' in key or 'PASSWORD' in key or 'SECRET' in key else value}")
     raise ValueError("LLM configuration error: Please set GOOGLE_API_KEY environment variable.")
 
 # --- Define the FitForge Agent ---
