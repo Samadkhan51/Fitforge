@@ -23,6 +23,7 @@ mcp_connection_params = StdioConnectionParams(
 
 # Get the API key from environment variables
 api_key = os.getenv("GOOGLE_API_KEY")
+print(f"API Key loaded successfully: {'Yes' if api_key else 'No'}")
 
 if not api_key:
     raise ValueError("LLM configuration error: Please set GOOGLE_API_KEY environment variable.")
