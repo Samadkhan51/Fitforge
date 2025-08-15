@@ -21,34 +21,11 @@ mcp_connection_params = StdioConnectionParams(
     timeout=60.0,
 )
 
-# Try multiple ways to get the API key
+# Get the API key from environment variables
 api_key = os.getenv("GOOGLE_API_KEY")
 
-# If not found, try alternative environment variable names that Railway might use
 if not api_key:
-    api_key = os.getenv("GOOGLE_API_KEY_")  # With trailing underscore
-if not api_key:
-    api_key = os.getenv("google_api_key")   # Lowercase
-if not api_key:
-    api_key = os.getenv("GoogleApiKey")     # CamelCase
-
-# Debug: Check what we found
-print(f"Environment variable check: GOOGLE_API_KEY = {'Found' if api_key else 'Not Found'}")
-
-if not api_key:
-    # Print available environment variables for debugging
-    print("Available environment variables:")
-    env_vars = list(os.environ.keys())
-    print(f"Total variables: {len(env_vars)}")
-    
-    # Look for any variable that might contain our API key
-    potential_keys = [k for k in env_vars if 'GOOGLE' in k.upper() or 'API' in k.upper()]
-    if potential_keys:
-        print(f"Potential API key variables: {potential_keys}")
-    else:
-        print("No variables containing 'GOOGLE' or 'API' found")
-    
-    raise ValueError(f"LLM configuration error: GOOGLE_API_KEY environment variable not found. Available vars: {len(env_vars)}")
+    raise ValueError("LLM configuration error: Please set GOOGLE_API_KEY environment variable.")
 
 # --- Define the FitForge Agent ---
 fitforge_agent = LlmAgent(
